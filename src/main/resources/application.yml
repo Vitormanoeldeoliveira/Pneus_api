@@ -1,0 +1,33 @@
+# Swagger UI: http://localhost:8080/swagger-ui.html
+server:
+  port: 8080
+
+spring:
+  application:
+    name: rodizio-api
+  datasource:
+    url: jdbc:postgresql://localhost:5432/oficina_pneus
+    username: postgres
+    password: "1234"
+  jpa:
+    open-in-view: true
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        format_sql: true
+  jackson:
+    serialization:
+      write-dates-as-timestamps: false
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+    tags-sorter: alpha
+    operations-sorter: method
+  api-docs:
+    path: /v3/api-docs
+
+logging:
+  level:
+    com.mosca.pneus: INFO
