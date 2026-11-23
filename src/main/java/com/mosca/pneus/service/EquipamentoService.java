@@ -3,12 +3,14 @@ package com.mosca.pneus.service;
 import com.mosca.pneus.domain.Equipamento;
 import com.mosca.pneus.domain.Pneu;
 import com.mosca.pneus.domain.StatusPneu;
+import com.mosca.pneus.exception.EquipamentoException;
 import com.mosca.pneus.repository.EquipamentoRepository;
 import com.mosca.pneus.repository.PneuRepository;
 import org.hibernate.Hibernate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
@@ -42,11 +44,7 @@ public class EquipamentoService {
 
     @Transactional
     public String criar(Equipamento dados) {
-        String erro = validar(dados);
-
-        if (erro != null) {
-            return erro;
-        }
+        EquipamentoException.validar(dados);
 
         String codigo = Textos.upper(dados.getCodigo());
 
@@ -58,7 +56,7 @@ public class EquipamentoService {
         dados.setNome(dados.getNome().trim());
         dados.setPlaca(Textos.upper(Textos.trimToNull(dados.getPlaca())));
         dados.setObservacao(Textos.trimToNull(dados.getObservacao()));
-        dados.setPneus(new java.util.ArrayList<>());
+        dados.setPneus(new ArrayList<>());
 
         equipamentoRepository.save(dados);
         return null;
@@ -72,11 +70,7 @@ public class EquipamentoService {
             return "Equipamento não encontrado";
         }
 
-        String erro = validar(dados);
-
-        if (erro != null) {
-            return erro;
-        }
+        EquipamentoException.validar(dados);
 
         String codigo = Textos.upper(dados.getCodigo());
 
@@ -232,25 +226,6 @@ public class EquipamentoService {
         }
 
         pneuOrigem.setPosicao(destino);
-        return null;
-    }
-
-    private String validar(Equipamento dados) {
-        if (dados.getCodigo() == null || dados.getCodigo().isBlank()
-                || dados.getNome() == null || dados.getNome().isBlank()) {
-            return "Informe código e nome";
-        }
-
-        if (dados.getTipo() == null || dados.getStatus() == null) {
-            return "Informe tipo e status";
-        }
-
-        if (dados.getQuantidadePosicoes() == null
-                || dados.getQuantidadePosicoes() < 1
-                || dados.getQuantidadePosicoes() > 24) {
-            return "Informe de 1 a 24 posições";
-        }
-
         return null;
     }
 

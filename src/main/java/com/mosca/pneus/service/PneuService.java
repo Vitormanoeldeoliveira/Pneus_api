@@ -3,6 +3,7 @@ package com.mosca.pneus.service;
 import com.mosca.pneus.domain.Equipamento;
 import com.mosca.pneus.domain.Pneu;
 import com.mosca.pneus.domain.StatusPneu;
+import com.mosca.pneus.exception.PneuException;
 import com.mosca.pneus.repository.MovimentacaoRepository;
 import com.mosca.pneus.repository.PneuRepository;
 import org.hibernate.Hibernate;
@@ -42,11 +43,7 @@ public class PneuService {
 
     @Transactional
     public String criar(Pneu pneu) {
-        String erro = validar(pneu);
-
-        if (erro != null) {
-            return erro;
-        }
+        PneuException.validar(pneu);
 
         if (pneu.getStatus() == StatusPneu.EM_USO) {
             return "Pneu entra em uso quando é montado no equipamento";
@@ -79,11 +76,7 @@ public class PneuService {
             return "Pneu não encontrado";
         }
 
-        String erro = validar(dados);
-
-        if (erro != null) {
-            return erro;
-        }
+        PneuException.validar(dados);
 
         String codigo = Textos.upper(dados.getCodigo());
 
@@ -128,28 +121,6 @@ public class PneuService {
         }
 
         pneuRepository.delete(pneu);
-        return null;
-    }
-
-    private String validar(Pneu pneu) {
-        if (pneu.getCodigo() == null || pneu.getCodigo().isBlank()) {
-            return "Informe o código";
-        }
-
-        if (pneu.getMarca() == null || pneu.getMarca().isBlank()
-                || pneu.getModelo() == null || pneu.getModelo().isBlank()
-                || pneu.getMedida() == null || pneu.getMedida().isBlank()) {
-            return "Preencha marca, modelo e medida";
-        }
-
-        if (pneu.getSulcoMm() == null || pneu.getKm() == null) {
-            return "Informe sulco e quilometragem";
-        }
-
-        if (pneu.getStatus() == null) {
-            return "Informe o status";
-        }
-
         return null;
     }
 
