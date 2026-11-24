@@ -13,7 +13,7 @@ Swagger: [http://localhost:8080/swagger-ui.html](http://localhost:8080/swagger-u
 - Montar um pneu de estoque numa posição livre.
 - Devolver esse pneu ao estoque.
 - Trocar dois pneus de lugar no mesmo equipamento, ou mover um para uma posição vazia.
-- Consultar as movimentações, da mais recente para a mais antiga.
+- Consultar as movimentações, da mais recente para a mais antiga, e filtrar as listas na própria requisição.
 
 O vínculo não é um campo livre no cadastro do pneu. Ele nasce na montagem.
 
@@ -110,17 +110,68 @@ O CORS libera o front em `http://localhost:5173`.
 
 ## Como o erro volta
 
-Quase toda recusa é **400**. Vira **404** quando a mensagem diz que algo não foi encontrado ou que não há pneu na posição.
+Quase toda recusa é **400**, sempre com `message`. Vira **404** quando a mensagem diz que algo não foi encontrado ou que não há pneu na posição.
+
+Campo ausente ou vazio entra na lista do que falta. Vários de uma vez, separados por ponto.
 
 ```json
 { "message": "Falta o código" }
 ```
 
 ```json
-{ "message": "Falta o código. Falta a marca. Falta o modelo" }
+{ "message": "Falta o código. Falta o nome. Falta o tipo" }
+```
+
+Valor que não cabe no campo diz qual foi e o que serve no lugar.
+
+```json
+{ "message": "Tipo inválido: \"CAMINHA\". Use CAMINHAO, ONIBUS, TRATOR, EMPILHADEIRA, CARREGADEIRA ou OUTRO" }
+```
+
+```json
+{ "message": "Quantidade de posições inválida: \"seis\". Informe um número" }
+```
+
+```json
+{ "message": "Status inválido: \"FOO\". Use ESTOQUE, EM_USO ou DESCARTADO" }
+```
+
+```json
+{ "message": "Data de aquisição inválida: \"13/13/2026\". Use o formato aaaa-mm-dd" }
+```
+
+JSON quebrado, ou colado com caractere invisível (slide, Word), também explica o caso em vez do erro genérico do servidor.
+
+```json
+{ "message": "O JSON enviado não pôde ser lido. Confira vírgulas, aspas e chaves" }
+```
+
+```json
+{ "message": "O JSON tem um caractere invisível. Apague o corpo e escreva de novo, sem colar de slide ou documento" }
 ```
 
 Cadastro e atualização que passam devolvem o recurso. Criar responde **201**. Excluir com sucesso responde **204**, sem corpo.
+
+## Filtros
+
+As listagens filtram na requisição, pela query string. Sem parâmetro, ou com o valor em branco, a lista volta inteira, na mesma ordem de sempre.
+
+Texto é “contém” e ignora maiúscula: `codigo=pn-11` acha `PN-1101`. `%` e `_` entram como texto, não como curinga. Status e tipo são valor exato.
+
+| Lista | Parâmetros |
+| --- | --- |
+| `GET /api/pneus` | `codigo`, `marca`, `modelo`, `medida`, `status`, `equipamento` |
+| `GET /api/pneus/estoque` | `codigo`, `marca`, `modelo`, `medida` |
+| `GET /api/equipamentos` | `codigo`, `nome`, `placa`, `tipo`, `status` |
+| `GET /api/movimentacoes` | `pneu`, `origem`, `destino` |
+
+`equipamento` e `pneu` comparam o código. O estoque já é só `ESTOQUE` sem equipamento, então essa rota não recebe status nem equipamento.
+
+```
+GET /api/pneus?codigo=PN-11&status=ESTOQUE
+GET /api/equipamentos?tipo=CAMINHAO
+GET /api/movimentacoes?pneu=PN-2001
+```
 
 ## Endpoints
 
@@ -128,8 +179,8 @@ Cadastro e atualização que passam devolvem o recurso. Criar responde **201**. 
 
 | Método | Caminho | O que faz |
 | --- | --- | --- |
-| `GET` | `/api/pneus` | Lista todos, por código |
-| `GET` | `/api/pneus/estoque` | Só os que estão em estoque e sem equipamento |
+| `GET` | `/api/pneus` | Lista por código. Aceita os filtros da listagem |
+| `GET` | `/api/pneus/estoque` | Só os que estão em estoque e sem equipamento. Aceita filtro de texto |
 | `GET` | `/api/pneus/{id}` | Busca um |
 | `POST` | `/api/pneus` | Cadastra |
 | `PUT` | `/api/pneus/{id}` | Atualiza |
@@ -155,7 +206,7 @@ Não envie `id`, `equipamento` nem `posicao` no cadastro. A API zera o vínculo.
 
 | Método | Caminho | O que faz |
 | --- | --- | --- |
-| `GET` | `/api/equipamentos` | Lista todos, por código, com os pneus de cada um |
+| `GET` | `/api/equipamentos` | Lista por código, com os pneus de cada um. Aceita os filtros da listagem |
 | `GET` | `/api/equipamentos/{id}` | Busca um, com os pneus montados |
 | `POST` | `/api/equipamentos` | Cadastra |
 | `PUT` | `/api/equipamentos/{id}` | Atualiza |
@@ -207,7 +258,7 @@ As três operações devolvem o equipamento atualizado, já com os pneus nas pos
 
 | Método | Caminho | O que faz |
 | --- | --- | --- |
-| `GET` | `/api/movimentacoes` | Lista as saídas, da mais recente para a mais antiga |
+| `GET` | `/api/movimentacoes` | Lista as saídas, da mais recente para a mais antiga. Aceita filtro por pneu, origem e destino |
 
 Não existe cadastro manual. Cada montagem, retirada e troca grava sozinha: pneu, origem, destino e data.
 

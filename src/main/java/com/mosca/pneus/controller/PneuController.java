@@ -1,6 +1,7 @@
 package com.mosca.pneus.controller;
 
 import com.mosca.pneus.domain.Pneu;
+import com.mosca.pneus.domain.StatusPneu;
 import com.mosca.pneus.service.PneuService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.net.URI;
@@ -30,14 +32,26 @@ public class PneuController {
 
     @GetMapping
     @Operation(summary = "Lista pneus")
-    public List<Pneu> listar() {
-        return pneuService.listar();
+    public List<Pneu> listar(
+            @RequestParam(required = false) String codigo,
+            @RequestParam(required = false) String marca,
+            @RequestParam(required = false) String modelo,
+            @RequestParam(required = false) String medida,
+            @RequestParam(required = false) StatusPneu status,
+            @RequestParam(required = false) String equipamento
+    ) {
+        return pneuService.listar(codigo, marca, modelo, medida, status, equipamento);
     }
 
     @GetMapping("/estoque")
     @Operation(summary = "Lista pneus em estoque")
-    public List<Pneu> estoque() {
-        return pneuService.estoque();
+    public List<Pneu> estoque(
+            @RequestParam(required = false) String codigo,
+            @RequestParam(required = false) String marca,
+            @RequestParam(required = false) String modelo,
+            @RequestParam(required = false) String medida
+    ) {
+        return pneuService.estoque(codigo, marca, modelo, medida);
     }
 
     @GetMapping("/{id}")

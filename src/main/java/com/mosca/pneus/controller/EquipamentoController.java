@@ -1,6 +1,8 @@
 package com.mosca.pneus.controller;
 
 import com.mosca.pneus.domain.Equipamento;
+import com.mosca.pneus.domain.StatusEquipamento;
+import com.mosca.pneus.domain.TipoEquipamento;
 import com.mosca.pneus.service.EquipamentoService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -12,6 +14,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.net.URI;
@@ -31,8 +34,14 @@ public class EquipamentoController {
 
     @GetMapping
     @Operation(summary = "Lista equipamentos")
-    public List<Equipamento> listar() {
-        return equipamentoService.listar();
+    public List<Equipamento> listar(
+            @RequestParam(required = false) String codigo,
+            @RequestParam(required = false) String nome,
+            @RequestParam(required = false) String placa,
+            @RequestParam(required = false) TipoEquipamento tipo,
+            @RequestParam(required = false) StatusEquipamento status
+    ) {
+        return equipamentoService.listar(codigo, nome, placa, tipo, status);
     }
 
     @GetMapping("/{id}")

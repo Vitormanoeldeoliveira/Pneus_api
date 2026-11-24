@@ -6,6 +6,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -23,7 +24,11 @@ public class MovimentacaoController {
 
     @GetMapping
     @Operation(summary = "Lista as saídas de pneu, da mais recente para a mais antiga")
-    public List<Movimentacao> listar() {
-        return movimentacaoService.listar();
+    public List<Movimentacao> listar(
+            @RequestParam(required = false) String pneu,
+            @RequestParam(required = false) String origem,
+            @RequestParam(required = false) String destino
+    ) {
+        return movimentacaoService.listar(pneu, origem, destino);
     }
 }

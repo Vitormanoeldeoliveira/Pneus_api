@@ -3,15 +3,18 @@ package com.mosca.pneus.service;
 import com.mosca.pneus.domain.Equipamento;
 import com.mosca.pneus.domain.Pneu;
 import com.mosca.pneus.domain.StatusPneu;
+import com.mosca.pneus.domain.StatusEquipamento;
+import com.mosca.pneus.domain.TipoEquipamento;
 import com.mosca.pneus.exception.EquipamentoException;
+import com.mosca.pneus.repository.Consulta;
 import com.mosca.pneus.repository.EquipamentoRepository;
 import com.mosca.pneus.repository.PneuRepository;
 import org.hibernate.Hibernate;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 
 @Service
@@ -31,11 +34,11 @@ public class EquipamentoService {
         this.movimentacaoService = movimentacaoService;
     }
 
-    public List<Equipamento> listar() {
-        return equipamentoRepository.findAll().stream()
-                .sorted(Comparator.comparing(Equipamento::getCodigo))
-                .map(this::semProxy)
-                .toList();
+    public List<Equipamento> listar(String codigo, String nome, String placa, TipoEquipamento tipo, StatusEquipamento status) {
+        return equipamentoRepository.findAll(
+                Consulta.equipamentos(codigo, nome, placa, tipo, status),
+                Sort.by("codigo")
+        ).stream().map(this::semProxy).toList();
     }
 
     public Equipamento buscar(Long id) {

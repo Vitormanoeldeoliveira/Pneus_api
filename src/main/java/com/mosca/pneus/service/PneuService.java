@@ -4,13 +4,14 @@ import com.mosca.pneus.domain.Equipamento;
 import com.mosca.pneus.domain.Pneu;
 import com.mosca.pneus.domain.StatusPneu;
 import com.mosca.pneus.exception.PneuException;
+import com.mosca.pneus.repository.Consulta;
 import com.mosca.pneus.repository.MovimentacaoRepository;
 import com.mosca.pneus.repository.PneuRepository;
 import org.hibernate.Hibernate;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Comparator;
 import java.util.List;
 
 @Service
@@ -24,17 +25,18 @@ public class PneuService {
         this.movimentacaoRepository = movimentacaoRepository;
     }
 
-    public List<Pneu> listar() {
-        return pneuRepository.findAll().stream()
-                .sorted(Comparator.comparing(Pneu::getCodigo))
-                .map(this::semProxy)
-                .toList();
+    public List<Pneu> listar(String codigo, String marca, String modelo, String medida, StatusPneu status, String equipamento) {
+        return pneuRepository.findAll(
+                Consulta.pneus(codigo, marca, modelo, medida, status, equipamento, false),
+                Sort.by("codigo")
+        ).stream().map(this::semProxy).toList();
     }
 
-    public List<Pneu> estoque() {
-        return pneuRepository.findByStatusAndEquipamentoIsNullOrderByCodigoAsc(StatusPneu.ESTOQUE).stream()
-                .map(this::semProxy)
-                .toList();
+    public List<Pneu> estoque(String codigo, String marca, String modelo, String medida) {
+        return pneuRepository.findAll(
+                Consulta.pneus(codigo, marca, modelo, medida, null, null, true),
+                Sort.by("codigo")
+        ).stream().map(this::semProxy).toList();
     }
 
     public Pneu buscar(Long id) {

@@ -1,13 +1,12 @@
 package com.mosca.pneus.repository;
 
 import com.mosca.pneus.domain.Pneu;
-import com.mosca.pneus.domain.StatusPneu;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
-import java.util.List;
 import java.util.Optional;
 
-public interface PneuRepository extends JpaRepository<Pneu, Long> {
+public interface PneuRepository extends JpaRepository<Pneu, Long>, JpaSpecificationExecutor<Pneu> {
 
     boolean existsByCodigo(String codigo);
 
@@ -16,6 +15,4 @@ public interface PneuRepository extends JpaRepository<Pneu, Long> {
     boolean existsByEquipamento_Id(Long equipamentoId);
 
     Optional<Pneu> findByEquipamento_IdAndPosicao(Long equipamentoId, Integer posicao);
-
-    List<Pneu> findByStatusAndEquipamentoIsNullOrderByCodigoAsc(StatusPneu status);
 }

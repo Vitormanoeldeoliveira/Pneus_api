@@ -2,8 +2,10 @@ package com.mosca.pneus.service;
 
 import com.mosca.pneus.domain.Movimentacao;
 import com.mosca.pneus.domain.Pneu;
+import com.mosca.pneus.repository.Consulta;
 import com.mosca.pneus.repository.MovimentacaoRepository;
 import org.hibernate.Hibernate;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -17,10 +19,11 @@ public class MovimentacaoService {
         this.movimentacaoRepository = movimentacaoRepository;
     }
 
-    public List<Movimentacao> listar() {
-        return movimentacaoRepository.findAllByOrderByDataHoraDesc().stream()
-                .map(this::semProxy)
-                .toList();
+    public List<Movimentacao> listar(String pneu, String origem, String destino) {
+        return movimentacaoRepository.findAll(
+                Consulta.movimentacoes(pneu, origem, destino),
+                Sort.by(Sort.Direction.DESC, "dataHora")
+        ).stream().map(this::semProxy).toList();
     }
 
     public void registrar(Pneu pneu, String origem, String destino) {
